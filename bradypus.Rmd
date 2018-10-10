@@ -1,0 +1,27 @@
+---
+title: "Bradypus"
+author: "Brad Anderson"
+date: "October 10, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(dismo)
+file <- paste(system.file(package="dismo"), "/ex/bradypus.csv", sep="")
+
+# this is the file we will use:
+file
+
+```
+
+```{r}
+
+bradypus <- read.table(file,  header=TRUE,  sep=",")
+bradypus <- bradypus[,2:3]
+head(bradypus)
+```
+

@@ -23,22 +23,30 @@ library(maptools)
 
 ```{r PARAMETERS and FILE LOCATIONS}
 
+#Species Occurence Points
+points <- read_csv("~/github/sdm/oakwoodland_points.csv")
+
+#Environmental Variables Folder
+variable_path <- file.path("H:/SDM/CCMSM4_rcp85/2010-2039/")
+
+```
+
+Alternatively, could I draw the points out of a shapefile?
+```{r}
+
+#oakwoodland_points <- shapefile("H:/SDM/OccurencePoints/OakWoodland_points_Project.shp")
+#oakwoodland_points
+
 ```
 
 
 #Import species occurence points.
-```{r species points}
-
-#oakwoodland_points <- shapefile(G:/Working_Maps/Brad/ESM270P/oakwoodland_points.shp)
-#oakwoodland_points
-
-oak_points <- read_csv("~/github/sdm/oakwoodland_points.csv")
-head(oak_points)
+```{r plot points}
 
 #Plot Points
 data(wrld_simpl)
 plot(wrld_simpl, xlim=c(-121,-120), ylim=c(34,35), axes=TRUE, col="light yellow")
-points(oak_points$Long, oak_points$Lat, col='red', cex=0.75)
+points(points$Long, points$Lat, col='red', cex=0.75)
 
 
 ```
@@ -46,26 +54,23 @@ points(oak_points$Long, oak_points$Lat, col='red', cex=0.75)
 #Import environmental data:
 "For any particular study the layers should all have the same spatial extent, resolution, origin, and projection. If necessary, use functions like crop, extend, aggregate, resample, and projectRaster from the raster package."
 
-```{r environmental data}
-var_path <- file.path("H:/SDM/CCMSM4_rcp85/2010-2039/")
-r1 <- raster("H:/SDM/CCMSM4_rcp85/2010-2039/aet2010_2039_ave_CCSM4_rcp85_1539579674.tif")
-plot(r1)
-
-```
-
 ```{r create raster stack of envi variables}
 
-variables <- list.files(var_path, pattern='tif$', full.names=TRUE )
+variables <- list.files(variable_path, pattern='tif$', full.names=TRUE )
 variables
 
-#predictors <- stack(variables)
-#predictors
-#names(predictors)
-#plot(predictors)
+predictors <- stack(variables)
+predictors
+names(predictors)
+plot(predictors)
 
 ```
 
 Questions:
 How do I import a shapefile? -I exported a comma delimited .txt file from Arc Pro and then turned into a .csv before importing into RStudio.
+
 Should I do a different model run for each forecast time period? (ie 2010-2039,2040-2069,2070-2099)
-Extent - run it across the whole state and then crop the preserve?
+
+Extent - run it across the whole state and then crop the preserve? Start with the preserve.
+
+Where I left off: checking the projections of the raster layers, they show as NA...

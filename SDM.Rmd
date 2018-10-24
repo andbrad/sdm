@@ -21,24 +21,22 @@ library(maptools)
 
 ```
 
+#Set Data Locations
 ```{r PARAMETERS and FILE LOCATIONS}
 
 #Species Occurence Points
 points <- read_csv("~/github/sdm/oakwoodland_points.csv")
 
-#Environmental Variables Folder
+#Climate Variables Folder
 variable_path <- file.path("H:/SDM/CCMSM4_rcp85/2010-2039/")
 
-```
+#Soil
+soils <- raster("H:/SDM/Soils/top_soils.tif")
 
-Alternatively, could I draw the points out of a shapefile?
-```{r}
-
-#oakwoodland_points <- shapefile("H:/SDM/OccurencePoints/OakWoodland_points_Project.shp")
-#oakwoodland_points
+#DEM
+DEM <- raster("H:/SDM/DEM_usgs_2013/grdn35w121_13/w001001.adf")
 
 ```
-
 
 #Import species occurence points.
 ```{r plot points}
@@ -56,15 +54,40 @@ points(points$Long, points$Lat, col='red', cex=0.75)
 
 "A RasterStack can be formed from separate files and/or from a few layers (’bands’) from a single file. In fact, a RasterStack is a collection of RasterLayer objects with the same spatial extent and resolution. In essence it is a list of RasterLayer objects. A RasterStack can easily be formed form a collection of files in different locations and these can be mixed with RasterLayer objects that only exist in memory."
 
-```{r create raster stack of envi variables}
-
+```{r RasterStack & Define Projection}
+#Call all .tif files from the storage location
 variables <- list.files(variable_path, pattern='tif$', full.names=TRUE )
-variables
 
+#Stack tif files into a RasterStack
 predictors <- stack(variables)
-predictors
-names(predictors)
-plot(predictors)
+
+#Define project (For some reason the BCM data comes unprojected)
+crs(predictors) <- CRS('+init=epsg:3310')
+
+
+
+```
+
+```{r Data Prep}
+
+#Re-assign Numbers in soils raster
+soils_reclass <- reclassify(soils,rcl=c(120,150,NA))
+
+#Reproject Soils to NAD83 CA Teale Albers
+soils_proj <- projectRaster(soils_reclass, crs=crs(predictors))
+
+#Reproject DEM to NAD83 CA Teale Albers
+DEM_proj <- projectRaster(DEM, crs=crs(predictors))
+
+
+```
+
+```{r}
+
+#Crop
+predictors_crop <- crop(predictors, soils_proj)
+
+predictors_resample <- resample(predictors_crop,DEM,method='ngb',progress='text')
 
 ```
 
@@ -73,13 +96,6 @@ How do I import a shapefile? -I exported a comma delimited .txt file from Arc Pr
 
 Should I do a different model run for each forecast time period? (ie 2010-2039,2040-2069,2070-2099)
 
-Extent - run it across the whole state and then crop the preserve? Start with the preserve. Do I use a shapefile for the extent or lat long coordinates?
 
-Where I left off: checking the projections of the raster layers, they show as NA...The coord ref is in a seperate .tif.txt file?
-
-DEM is in a ArcGrid format? Do I need to convert this into a TIF in order to include in the RasterStack?
-
-```{r}
-
-```
-
+DEM import and aspect/slope calculation
+I could convert this into a TIF in order to include in the RasterStack?

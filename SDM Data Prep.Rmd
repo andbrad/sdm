@@ -1,0 +1,43 @@
+---
+title: "SDM Data Prep"
+author: "Brad Anderson"
+date: "October 24, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r packages, include=FALSE}
+library(dismo)
+library(tidyverse)
+library(sf)
+library(sp)
+library(raster)
+library(rgdal)
+library(maptools)
+
+
+```
+
+```{r soils}
+
+#soils <- st_read("H:/SDM/Soils/Dangermond AOI/spatial/soilmu_a_aoi.shp")
+#soils
+
+```
+
+```{r}
+
+soils <- raster("H:/SDM/Soils/top_soils.tif")
+plot(soils)
+soils
+
+```
+
+```{r}
+#crop
+threats_crop <- crop(all_threats,all_spp)
+```
+

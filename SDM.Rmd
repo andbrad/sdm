@@ -54,6 +54,8 @@ points(points$Long, points$Lat, col='red', cex=0.75)
 #Import environmental data:
 "For any particular study the layers should all have the same spatial extent, resolution, origin, and projection. If necessary, use functions like crop, extend, aggregate, resample, and projectRaster from the raster package."
 
+"A RasterStack can be formed from separate files and/or from a few layers (’bands’) from a single file. In fact, a RasterStack is a collection of RasterLayer objects with the same spatial extent and resolution. In essence it is a list of RasterLayer objects. A RasterStack can easily be formed form a collection of files in different locations and these can be mixed with RasterLayer objects that only exist in memory."
+
 ```{r create raster stack of envi variables}
 
 variables <- list.files(variable_path, pattern='tif$', full.names=TRUE )
@@ -71,6 +73,13 @@ How do I import a shapefile? -I exported a comma delimited .txt file from Arc Pr
 
 Should I do a different model run for each forecast time period? (ie 2010-2039,2040-2069,2070-2099)
 
-Extent - run it across the whole state and then crop the preserve? Start with the preserve.
+Extent - run it across the whole state and then crop the preserve? Start with the preserve. Do I use a shapefile for the extent or lat long coordinates?
 
-Where I left off: checking the projections of the raster layers, they show as NA...
+Where I left off: checking the projections of the raster layers, they show as NA...The coord ref is in a seperate .tif.txt file?
+
+DEM is in a ArcGrid format? Do I need to convert this into a TIF in order to include in the RasterStack?
+
+```{r}
+
+```
+

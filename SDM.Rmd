@@ -22,7 +22,7 @@ library(maptools)
 ```
 
 #Set Data Locations
-```{r PARAMETERS and FILE LOCATIONS}
+```{r PARAMETERS and FILE LOCATIONS, include=FALSE}
 
 #Species Occurence Points
 points <- read_csv("~/github/sdm/oakwoodland_points.csv")
@@ -34,7 +34,13 @@ variable_path <- file.path("H:/SDM/CCMSM4_rcp85/2010-2039/")
 soils <- raster("H:/SDM/Soils/top_soils.tif")
 
 #DEM
-DEM <- raster("H:/SDM/DEM_usgs_2013/grdn35w121_13/w001001.adf")
+DEM <- raster("H:/SDM/DEM_usgs_2013/DEM_clip_ProjectRaster.tif")
+
+#Aspect
+aspect <- raster("H:/SDM/DEM_usgs_2013/aspect/Aspect.tif")
+
+#Slope
+slope <- raster("H:/SDM/DEM_usgs_2013/slope/slope.tif")
 
 ```
 
@@ -58,11 +64,11 @@ points(points$Long, points$Lat, col='red', cex=0.75)
 #Call all .tif files from the storage location
 variables <- list.files(variable_path, pattern='tif$', full.names=TRUE )
 
-#Stack tif files into a RasterStack
-predictors <- stack(variables)
+#Stack climate tif files into a RasterStack
+climate <- stack(variables)
 
 #Define project (For some reason the BCM data comes unprojected)
-crs(predictors) <- CRS('+init=epsg:3310')
+crs(climate) <- CRS('+init=epsg:3310')
 
 
 
@@ -70,14 +76,16 @@ crs(predictors) <- CRS('+init=epsg:3310')
 
 ```{r Data Prep}
 
-#Re-assign Numbers in soils raster
+#Re-assign numbers
 soils_reclass <- reclassify(soils,rcl=c(120,150,NA))
+aspect_reclass <- reclassify(aspect,rcl=c(-Inf,0,NA))
+slope_reclass <- reclassify(slope,rcl=c(-Inf,0,NA))
 
-#Reproject Soils to NAD83 CA Teale Albers
-soils_proj <- projectRaster(soils_reclass, crs=crs(predictors))
-
-#Reproject DEM to NAD83 CA Teale Albers
-DEM_proj <- projectRaster(DEM, crs=crs(predictors))
+#Reproject to NAD83 CA Teale Albers
+soils_proj <- projectRaster(soils_reclass, crs=crs(climate))
+DEM_proj <- projectRaster(DEM, crs=crs(climate))
+aspect_proj <- projectRaster(aspect_reclass, crs=crs(climate))
+slope_proj <- projectRaster(slope_reclass, crs=crs(climate))
 
 
 ```
@@ -85,17 +93,16 @@ DEM_proj <- projectRaster(DEM, crs=crs(predictors))
 ```{r}
 
 #Crop
-predictors_crop <- crop(predictors, soils_proj)
+climate_crop <- crop(climate, soils_proj)
+DEM_crop <- crop(DEM_proj, soils_proj)
+aspect_crop <- crop(aspect_proj, soils_proj)
+slope_crop <- crop(slope_proj, soils_proj)
 
-predictors_resample <- resample(predictors_crop,DEM,method='ngb',progress='text')
+climate_resample <- resample(climate_crop,DEM_crop,method='ngb',progress='text')
+soils_resample <- resample(soils_proj,DEM_crop,method='ngb',progress='text')
+aspect_resample <- resample(aspect_crop,DEM_crop,method='ngb',progress='text')
+slope_resample <- resample(slope_crop,DEM_crop,method='ngb',progress='text')
+
+predictors <- stack(climate_resample, soils_resample, DEM_crop, aspect_resample, slope_resample)
 
 ```
-
-Questions:
-How do I import a shapefile? -I exported a comma delimited .txt file from Arc Pro and then turned into a .csv before importing into RStudio.
-
-Should I do a different model run for each forecast time period? (ie 2010-2039,2040-2069,2070-2099)
-
-
-DEM import and aspect/slope calculation
-I could convert this into a TIF in order to include in the RasterStack?

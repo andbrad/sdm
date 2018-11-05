@@ -14,7 +14,6 @@ library(dismo)
 library(tidyverse)
 library(sf)
 library(sp)
-library(raster)
 library(rgdal)
 library(maptools)
 
@@ -107,14 +106,34 @@ predictors <- stack(climate_resample, soils_resample, DEM_crop, aspect_resample,
 
 ```
 
-```{r eval=FALSE, include=FALSE}
+```{r}
+
+vegetation <- read.table(occurence,  header=TRUE,  sep=',')
+vegetation <- vegetation[,-1]
+presvals <- extract(predictors, vegetation)
+set.seed(0)
+backgr <- randomPoints(predictors, 500)
+absvals <- extract(predictors, backgr)
+pb <- c(rep(1, nrow(presvals)), rep(0, nrow(absvals)))
+sdmdata <- data.frame(cbind(pb, rbind(presvals, absvals)))
+sdmdata[,'biome'] <- as.factor(sdmdata[,'biome'])
+
+set.seed(0)
+group <- kfold(occurence, 5)
+pres_train <- occurence[group != 1, ]
+pres_test <- occurence[group == 1, ]
+```
+
+
+
+```{r}
 jar <- paste(system.file(package="dismo"), "/java/maxent.jar", sep='')
 xm <- maxent(predictors, points, factors='biome')
 ## Loading required namespace: rJava
 plot(xm)
 ```
 
-```{r eval=FALSE, include=FALSE}
+```{r}
 
 e <- evaluate(pres_test, backg_test, xm, predictors)
 e
@@ -128,142 +147,3 @@ plot(wrld_simpl, add=TRUE, border='dark grey')
 points(pres_train, pch='+')
 
 ```
-
-```{r}
-# only run if the maxent.jar file is available, in the right folder
-jar <- paste(system.file(package="dismo"), "/java/maxent.jar", sep='')
-
-# file with presence points
-occurence <- paste("~/github/sdm/oakwoodland_points.csv")
-occ <- read.table(occurence, header=TRUE, sep=',')[,-1]
-
-# witholding a 20% sample for testing 
-fold <- kfold(occ, k=5)
-occtest <- occ[fold == 1, ]
-occtrain <- occ[fold != 1, ]
-
-# fit model, biome is a categorical variable
-me <- maxent(predictors, occtrain, factors='biome')
-
-# see the maxent results in a browser:
-# me
-
-# use "args"
-# me2 <- maxent(predictors, occtrain, factors='biome', args=c("-J", "-P"))
-
-# plot showing importance of each variable
-plot(me)
-
-# response curves
-# response(me)
-
-# predict to entire dataset
-r <- predict(me, predictors) 
-
-# with some options:
-# r <- predict(me, predictors, args=c("outputformat=raw"), progress='text', 
-#      filename='maxent_prediction.grd')
-
-plot(r)
-points(occ)
-
-#testing
-# background data
-bg <- randomPoints(predictors, 1000)
-
-#simplest way to use 'evaluate'
-e1 <- evaluate(me, p=occtest, a=bg, x=predictors)
-
-# alternative 1
-# extract values
-pvtest <- data.frame(extract(predictors, occtest))
-avtest <- data.frame(extract(predictors, bg))
-
-e2 <- evaluate(me, p=pvtest, a=avtest)
-
-# alternative 2 
-# predict to testing points 
-testp <- predict(me, pvtest) 
-head(testp)
-testa <- predict(me, avtest) 
-
-e3 <- evaluate(p=testp, a=testa)
-e3
-threshold(e3)
-
-plot(e3, 'ROC')
-```
-
-```{r}
-# only run if the maxent.jar file is available, in the right folder
-jar <- paste(system.file(package="dismo"), "/java/maxent.jar", sep='')
-
-
-
-# get predictor variables
-fnames <- list.files(path=paste(system.file(package="dismo"), '/ex', sep=''), 
-              pattern='grd', full.names=TRUE )
-predictors <- stack(fnames)
-#plot(predictors)
-
-# file with presence points
-occurence <- paste(system.file(package="dismo"), '/ex/bradypus.csv', sep='')
-occ <- read.table(occurence, header=TRUE, sep=',')[,-1]
-
-# witholding a 20% sample for testing 
-fold <- kfold(occ, k=5)
-occtest <- occ[fold == 1, ]
-occtrain <- occ[fold != 1, ]
-
-# fit model, biome is a categorical variable
-me <- maxent(predictors, occtrain, factors='biome')
-
-# see the maxent results in a browser:
-# me
-
-# use "args"
-# me2 <- maxent(predictors, occtrain, factors='biome', args=c("-J", "-P"))
-
-# plot showing importance of each variable
-plot(me)
-
-# response curves
-# response(me)
-
-# predict to entire dataset
-r <- predict(me, predictors) 
-
-# with some options:
-# r <- predict(me, predictors, args=c("outputformat=raw"), progress='text', 
-#      filename='maxent_prediction.grd')
-
-plot(r)
-points(occ)
-
-#testing
-# background data
-bg <- randomPoints(predictors, 1000)
-
-#simplest way to use 'evaluate'
-e1 <- evaluate(me, p=occtest, a=bg, x=predictors)
-
-# alternative 1
-# extract values
-pvtest <- data.frame(extract(predictors, occtest))
-avtest <- data.frame(extract(predictors, bg))
-
-e2 <- evaluate(me, p=pvtest, a=avtest)
-
-# alternative 2 
-# predict to testing points 
-testp <- predict(me, pvtest) 
-head(testp)
-testa <- predict(me, avtest) 
-
-e3 <- evaluate(p=testp, a=testa)
-e3
-threshold(e3)
-
-plot(e3, 'ROC')
-```
-

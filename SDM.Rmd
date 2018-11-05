@@ -104,46 +104,30 @@ slope_resample <- resample(slope_crop,DEM_crop,method='ngb',progress='text')
 
 predictors <- stack(climate_resample, soils_resample, DEM_crop, aspect_resample, slope_resample)
 
+#f <- "path/to/downloaded/file.tif"
+#r <- raster(f)
+#ra <- aggregate(r, fact=2)  ## By default aggregates using mean, but see fun=
+writeRaster(climate_resample, "H:/MaxEnt/Test/climate", format="ascii")
+
+#unstack to list
+x <- unstack(climate_resample)
+
+file.dir <- "H:/MaxEnt/Test/"
+climate.variable.names <- c("aet","aprpck","cwd","pet","ppt","rch","run","tmn","tmx")
+
+for(i in 1:length(x)) {
+  
+  fn <- paste0(file.dir,climate.variable.names[i],".asc")
+  writeRaster(x[[i]],fn,format="ascii",overwrite=T)
+  
+}
+
 ```
 
 ```{r}
 
-vegetation <- read.table(occurence,  header=TRUE,  sep=',')
-vegetation <- vegetation[,-1]
-presvals <- extract(predictors, vegetation)
-set.seed(0)
-backgr <- randomPoints(predictors, 500)
-absvals <- extract(predictors, backgr)
-pb <- c(rep(1, nrow(presvals)), rep(0, nrow(absvals)))
-sdmdata <- data.frame(cbind(pb, rbind(presvals, absvals)))
-sdmdata[,'biome'] <- as.factor(sdmdata[,'biome'])
-
-set.seed(0)
-group <- kfold(occurence, 5)
-pres_train <- occurence[group != 1, ]
-pres_test <- occurence[group == 1, ]
-```
-
-
-
-```{r}
-jar <- paste(system.file(package="dismo"), "/java/maxent.jar", sep='')
-xm <- maxent(predictors, points, factors='biome')
-## Loading required namespace: rJava
-plot(xm)
-```
-
-```{r}
-
-e <- evaluate(pres_test, backg_test, xm, predictors)
-e
-px <- predict(predictors, xm, ext=ext, progress='')
-par(mfrow=c(1,2))
-plot(px, main='Maxent, raw values')
-plot(wrld_simpl, add=TRUE, border='dark grey')
-tr <- threshold(e, 'spec_sens')
-plot(px > tr, main='presence/absence')
-plot(wrld_simpl, add=TRUE, border='dark grey')
-points(pres_train, pch='+')
 
 ```
+
+
+

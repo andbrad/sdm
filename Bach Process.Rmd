@@ -9,7 +9,7 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-```{r}
+```{r include=FALSE}
 library(dismo)
 library(tidyverse)
 library(sf)
@@ -20,19 +20,19 @@ library(maptools)
 
 ```{r}
 #Climate Variables Folder
-variable_path <- file.path("H:/SDM/Climate/CCMSM4_rcp85/2010-2039/")
+variable_path <- file.path("H:/MaxEnt/Environmental Variables/Climate/Historical/1981-2010")
 
 #Soil
-soils <- raster("H:/SDM/Soils/top_soils.tif")
+#soils <- raster("H:/SDM/Soils/top_soils.tif")
 
 #DEM
-DEM <- raster("H:/SDM/DEM_usgs_2013/DEM_clip_ProjectRaster.tif")
+DEM <- raster("H:/MaxEnt/Environmental Variables/Elevation Slope Aspect/DEM.tif")
 
 #Aspect
-aspect <- raster("H:/SDM/DEM_usgs_2013/aspect/Aspect.tif")
+aspect <- raster("H:/MaxEnt/Environmental Variables/Elevation Slope Aspect/Aspect.tif")
 
 #Slope
-slope <- raster("H:/SDM/DEM_usgs_2013/slope/slope.tif")
+slope <- raster("H:/MaxEnt/Environmental Variables/Elevation Slope Aspect/Slope.tif")
 ```
 
 ```{r}
@@ -48,12 +48,12 @@ crs(climate) <- CRS('+init=epsg:3310')
 
 ```{r}
 #Re-assign numbers
-soils_reclass <- reclassify(soils,rcl=c(120,150,NA))
+#soils_reclass <- reclassify(soils,rcl=c(120,150,NA))
 aspect_reclass <- reclassify(aspect,rcl=c(-Inf,0,NA))
 slope_reclass <- reclassify(slope,rcl=c(-Inf,0,NA))
 
 #Reproject to NAD83 CA Teale Albers
-soils_proj <- projectRaster(soils_reclass, crs=crs(climate))
+#soils_proj <- projectRaster(soils_reclass, crs=crs(climate))
 DEM_proj <- projectRaster(DEM, crs=crs(climate))
 aspect_proj <- projectRaster(aspect_reclass, crs=crs(climate))
 slope_proj <- projectRaster(slope_reclass, crs=crs(climate))

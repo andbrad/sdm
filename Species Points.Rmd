@@ -1,0 +1,28 @@
+---
+title: "Species Points"
+author: "Brad Anderson"
+date: "November 5, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r packages, include=FALSE}
+library(dismo)
+library(tidyverse)
+library(sf)
+library(sp)
+library(rgdal)
+library(maptools)
+
+
+```
+
+```{r}
+
+veg_raster <- raster()
+  
+```
+

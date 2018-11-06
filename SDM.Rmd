@@ -2,7 +2,10 @@
 title: "Bradypus"
 author: "Brad Anderson"
 date: "October 10, 2018"
-output: html_document
+output:
+  html_document: default
+  pdf_document: default
+  word_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -40,17 +43,6 @@ aspect <- raster("H:/SDM/DEM_usgs_2013/aspect/Aspect.tif")
 
 #Slope
 slope <- raster("H:/SDM/DEM_usgs_2013/slope/slope.tif")
-
-```
-
-#Import species occurence points.
-```{r plot points}
-
-#Plot Points
-data(wrld_simpl)
-plot(wrld_simpl, xlim=c(-121,-120), ylim=c(34,35), axes=TRUE, col="light yellow")
-points(points$Long, points$Lat, col='red', cex=0.75)
-
 
 ```
 
@@ -104,10 +96,15 @@ slope_resample <- resample(slope_crop,DEM_crop,method='ngb',progress='text')
 
 predictors <- stack(climate_resample, soils_resample, DEM_crop, aspect_resample, slope_resample)
 
+
+```
+
+```{r Convert Layers to Ascii for MaxEnt, include=FALSE}
+
 #f <- "path/to/downloaded/file.tif"
 #r <- raster(f)
 #ra <- aggregate(r, fact=2)  ## By default aggregates using mean, but see fun=
-writeRaster(climate_resample, "H:/MaxEnt/Test/climate", format="ascii")
+#writeRaster(climate_resample, "H:/MaxEnt/Test/climate", format="ascii")
 
 #unstack to list
 x <- unstack(climate_resample)
@@ -121,10 +118,6 @@ for(i in 1:length(x)) {
   writeRaster(x[[i]],fn,format="ascii",overwrite=T)
   
 }
-
-```
-
-```{r}
 
 
 ```

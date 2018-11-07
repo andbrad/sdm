@@ -42,8 +42,8 @@ aspect <- raster("H:/MaxEnt/Environmental Variables/Elevation Slope Aspect/Aspec
 slope <- raster("H:/MaxEnt/Environmental Variables/Elevation Slope Aspect/Slope.tif")
 
 #Extent (I am using two USFS Seed Zones)
-extent <- read_sf("H:/MaxEnt/Extent",
-                      layer="boundary")
+extent <- read_sf("H:/MaxEnt/Environmental Variables/Seed Zones",
+                      layer="seedzones165_140_991")
 
 
 ```
@@ -78,16 +78,17 @@ aspect_reclass <- reclassify(aspect_crop,rcl=c(-Inf,0,NA))
 #slope_reclass <- reclassify(slope_crop,rcl=c(-Inf,0,NA))
 
 #Reproject to NAD83 CA Teale Albers (Too big to run? I am getting an error...)
-soils_proj <- projectRaster(soils_crop, crs=crs(climate))
-DEM_proj <- projectRaster(DEM_crop, crs=crs(climate))
-aspect_proj <- projectRaster(aspect_reclass, crs=crs(climate))
-slope_proj <- projectRaster(slope_crop, crs=crs(climate))
+soils_proj <- raster::projectRaster(soils_crop, crs=crs(climate))
+#DEM_proj <- projectRaster(DEM_crop, crs=crs(climate))
+#aspect_proj <- projectRaster(aspect_reclass, crs=crs(climate))
+#slope_proj <- projectRaster(slope_crop, crs=crs(climate))
 
 
 ```
 
 ```{r}
 
+#May not need to do this...
 climate_resample <- resample(climate_crop,DEM_crop,method='ngb',progress='text')
 soils_resample <- resample(soils_proj,DEM_crop,method='ngb',progress='text')
 aspect_resample <- resample(aspect_proj,DEM_crop,method='ngb',progress='text')

@@ -21,8 +21,16 @@ library(maptools)
 ```
 
 ```{r}
+####SEE OWENS CODE#####
+
 
 veg_raster <- raster()
+
+#Species Occurence Points
+occurence <- read_csv("H:/MaxEnt/Species/Oak.csv")
+
+#Save as a shapefile for use in Arc
+#x<-extent %>% as_Spatial()
   
 ```
 

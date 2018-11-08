@@ -88,12 +88,12 @@ slope_proj <- projectRaster(slope_crop, crs=crs(climate))
 
 ```{r}
 
-climate_resample <- resample(climate_crop,DEM_crop,method='ngb',progress='text')
-soils_resample <- resample(soils_proj,DEM_crop,method='ngb',progress='text')
-aspect_resample <- resample(aspect_proj,DEM_crop,method='ngb',progress='text')
-slope_resample <- resample(slope_proj,DEM_crop,method='ngb',progress='text')
+climate_resample <- resample(climate_crop,DEM_proj,method='ngb',progress='text')
+soils_resample <- resample(soils_proj,DEM_proj,method='ngb',progress='text')
+aspect_resample <- resample(aspect_proj,DEM_proj,method='ngb',progress='text')
+slope_resample <- resample(slope_proj,DEM_proj,method='ngb',progress='text')
 
-predictors <- stack(climate_crop, soils_crop, DEM_crop, aspect_reclass, slope_crop)
+predictors <- stack(climate_resample, soils_resample, DEM_proj, aspect_resample, slope_resample)
 
 
 ```

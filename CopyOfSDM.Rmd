@@ -45,15 +45,15 @@ slope <- raster("H:/MaxEnt/Environmental Variables/Elevation Slope Aspect/Slope.
 #Extent (I am using two USFS Seed Zones)
 #extent <- read_sf("H:/MaxEnt/Extent",layer="boundary")
 
-dir_spatial   <- 'H:/MaxEnt/Extent'
-layer_bc <- 'boundary'
+#dir_spatial   <- 'H:/MaxEnt/Extent'
+#layer_bc <- 'boundary'
 
-extent <- readOGR(dsn = dir_spatial, layer = layer_bc, stringsAsFactors = FALSE)
+#extent <- readOGR(dsn = dir_spatial, layer = layer_bc, stringsAsFactors = FALSE)
 
 #mask <- raster("H:/MaxEnt/Environmental Variables/Seed Zones/seed_140.tif")
 #extent <- mask(DEM, mask)
 
-#extent <- raster("H:/MaxEnt/Environmental Variables/Seed Zones/seed_140.tif")
+extent <- raster("H:/MaxEnt/Environmental Variables/Seed Zones/seed_140.tif")
 
 ```
 
@@ -87,10 +87,10 @@ aspect <- reclassify(aspect,rcl=c(-Inf,0,NA))
 #slope_reclass <- reclassify(slope_crop,rcl=c(-Inf,0,NA))
 
 #Reproject to NAD83 CA Teale Albers (Too big to run? I am getting an error...)
-soils <- projectRaster(soils, crs=crs(climate))
-DEM <- projectRaster(DEM, crs=crs(climate))
-aspect <- projectRaster(aspect, crs=crs(climate))
-slope <- projectRaster(slope, crs=crs(climate))
+#soils <- projectRaster(soils, crs=crs(climate))
+#DEM <- projectRaster(DEM, crs=crs(climate))
+#aspect <- projectRaster(aspect, crs=crs(climate))
+#slope <- projectRaster(slope, crs=crs(climate))
 
 
 ```

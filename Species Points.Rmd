@@ -61,7 +61,10 @@ sample_points %>% st_as_sf(coords=c("lon","lat")) %>%
 ```{r}
 
 vegetation <- raster("H:/MaxEnt/Species/fveg_seedzones.tif")
-rasterToPoints(vegetation, fun=function(x){x==1})
+
+#oak <- vegetation %>% filter(WHRTYPE == "COW")
+
+veg_points <- rasterToPoints(vegetation, fun=function(WHRTYPE){WHRTYPE == "COW"})
   
 ```
 

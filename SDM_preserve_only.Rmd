@@ -1,0 +1,137 @@
+---
+title: "Bradypus"
+author: "Brad Anderson"
+date: "October 10, 2018"
+output:
+  html_document: default
+  pdf_document: default
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r packages, include=FALSE}
+library(dismo)
+library(tidyverse)
+library(sf)
+library(sp)
+library(rgdal)
+library(maptools)
+library(raster)
+
+
+```
+
+#Set Data Locations
+```{r PARAMETERS and FILE LOCATIONS, include=FALSE}
+
+#Climate Variables Folder
+variable_path <- file.path("H:/SDM/Climate/Historical/1981-2010/")
+
+#Soil
+soils <- raster("H:/MaxEnt/Environmental Variables/SSURGO Soil/sb_soil.tif")
+
+#DEM
+DEM <- raster("H:/MaxEnt/Environmental Variables/Elevation Slope Aspect/DEM.tif")
+
+#Aspect
+aspect <- raster("H:/MaxEnt/Environmental Variables/Elevation Slope Aspect/Aspect.tif")
+
+#Slope
+slope <- raster("H:/MaxEnt/Environmental Variables/Elevation Slope Aspect/Slope.tif")
+
+#Extent (I am using two USFS Seed Zones)
+#extent <- read_sf("H:/MaxEnt/Extent",layer="boundary")
+
+#dir_spatial   <- 'H:/MaxEnt/Extent'
+#layer_bc <- 'boundary'
+
+#extent <- readOGR(dsn = dir_spatial, layer = layer_bc, stringsAsFactors = FALSE)
+
+#mask <- raster("H:/MaxEnt/Environmental Variables/Seed Zones/seed_140.tif")
+#extent <- mask(DEM, mask)
+
+extent <- raster("H:/MaxEnt/Environmental Variables/Seed Zones/seed_140.tif")
+
+```
+
+#Climate data:
+```{r RasterStack & Define Projection}
+#Call all .tif files from the storage location
+variables <- list.files(variable_path, pattern='tif$', full.names=TRUE )
+
+#Stack climate tif files into a RasterStack
+climate <- stack(variables)
+
+#Define project (For some reason the BCM data comes unprojected)
+crs(climate) <- CRS('+init=epsg:3310')
+
+
+
+```
+
+#Prepare Data
+```{r Data Prep}
+#Crop
+climate <- crop(climate, extent)
+DEM <- crop(DEM, extent)
+aspect <- crop(aspect, extent)
+slope <- crop(slope, extent)
+soils <- crop(soils, extent)
+
+#Re-assign numbers
+#soils_reclass <- reclassify(soils_crop,rcl=c(120,150,NA))
+aspect <- reclassify(aspect,rcl=c(-Inf,0,NA))
+#slope_reclass <- reclassify(slope_crop,rcl=c(-Inf,0,NA))
+
+#Reproject to NAD83 CA Teale Albers (Too big to run? I am getting an error...)
+#soils <- projectRaster(soils, crs=crs(climate))
+#DEM <- projectRaster(DEM, crs=crs(climate))
+#aspect <- projectRaster(aspect, crs=crs(climate))
+#slope <- projectRaster(slope, crs=crs(climate))
+
+
+```
+
+```{r}
+
+#May not need to do this...
+climate <- resample(climate,DEM,method='ngb',progress='text')
+soils <- resample(soils,DEM,method='ngb',progress='text')
+aspect <- resample(aspect,DEM,method='ngb',progress='text')
+slope <- resample(slope,DEM,method='ngb',progress='text')
+
+predictors <- stack(climate, soils, DEM, aspect, slope)
+
+
+```
+
+```{r Convert Cliamte to Ascii for MaxEnt, include=FALSE}
+
+#unstack to list
+x <- unstack(climate)
+
+file.dir <- "H:/MaxEnt/R Output/"
+climate.variable.names <- c("aet","aprpck","cwd","pet","ppt","rch","run","tmn","tmx")
+
+for(i in 1:length(x)) {
+  
+  fn <- paste0(file.dir,climate.variable.names[i],".asc")
+  writeRaster(x[[i]],fn,format="ascii",overwrite=T)
+  
+}
+
+
+```
+
+```{r Convert other layers to ASCII}
+writeRaster(DEM,"H:/MaxEnt/R Output/DEM",format="ascii",overwrite=T)
+writeRaster(aspect,"H:/MaxEnt/R Output/aspect",format="ascii",overwrite=T)
+writeRaster(slope,"H:/MaxEnt/R Output/slope",format="ascii",overwrite=T)
+writeRaster(soils,"H:/MaxEnt/R Output/soils",format="ascii",overwrite=T)
+
+```
+
+

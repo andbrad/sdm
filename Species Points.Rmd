@@ -20,7 +20,7 @@ library(maptools)
 
 ```
 
-```{r}
+```{r, eval=FALSE, include=FALSE}
 ####SEE OWENS CODE#####
 
 
@@ -31,6 +31,37 @@ occurence <- read_csv("H:/MaxEnt/Species/Oak.csv")
 
 #Save as a shapefile for use in Arc
 #x<-extent %>% as_Spatial()
+  
+```
+
+```{r}
+
+state_wide <- read_sf("H:/Classes/ESM 270P F18/Wieslander_Statewide_CANAD83",
+                      layer="Wieslander_Statewide_CANAD83")
+
+coastal_oak <- state_wide %>% filter(WHR1_TYPE=="Coastal Oak Woodland")
+
+sample_points <- coastal_oak %>%
+  st_sample(10000) %>%
+  # transform to WGS84 with lat/lon (EPSG code 4236)
+  st_transform(crs=4326) %>%
+  #get longitude and latitude of the points as separate columns
+  st_coordinates() %>% 
+  as_data_frame() %>% 
+  set_names(c("lon","lat"))
+
+# see what they look like
+
+sample_points %>% st_as_sf(coords=c("lon","lat")) %>%
+  ggplot()+
+  geom_sf()
+
+```
+
+```{r}
+
+vegetation <- raster("H:/MaxEnt/Species/fveg_seedzones.tif")
+rasterToPoints(vegetation, fun=function(x){x==1})
   
 ```
 
